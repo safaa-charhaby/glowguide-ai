@@ -1,0 +1,6 @@
+Acne Fighting,Acne Trigger,Anti-Aging,Brightening,Dark Spots,Drying,Eczema,Good For Oily Skin,Hydrating,Irritating,Redness Reducing,Reduces Irritation,Reduces Large Pores,Rosacea,Scar Healing,hyaluronic,niacinamide,peptide,vitamin_c,ceramide,retinol,aha_bha,antioxidant,mineral_spf,growth_factor,probiotic,hydrating,emollient,preservative,texture_stabilizer,fragrance,solvent,ph_adjuster,colorant,skin_soothing,2_hexanediol,glyceryl_caprylate,hydroxyacetophenone,titanium_dioxide,predicted_ingredients
+1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,1,0,0,0,0,0,0,0,0,"['probiotic', 'emollient', 'preservative', 'fragrance']"
+0,0,1,1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,1,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,"['antioxidant', 'probiotic', 'hydrating', 'emollient', 'preservative', 'texture_stabilizer']"
+0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1,0,0,0,0,0,0,1,0,0,1,0,1,1,0,1,0,0,1,1,0,0,0,0,"['hyaluronic', 'antioxidant', 'probiotic', 'emollient', 'preservative', 'fragrance', 'colorant', 'skin_soothing']"
+0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,1,0,0,0,0,0,0,0,0,"['probiotic', 'emollient', 'texture_stabilizer', 'fragrance']"
+1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,1,0,0,0,0,0,0,0,0,"['probiotic', 'hydrating', 'emollient', 'preservative', 'fragrance']"
