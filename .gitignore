@@ -1,1 +1,21 @@
-backend/multi_target_svm_model.joblib
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+backend/venv/
+
+# Node
+node_modules/
+docs/node_modules/
+
+# Build outputs
+
+build/
+
+# OS
+.DS_Store
+Thumbs.db
