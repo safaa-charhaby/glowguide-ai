@@ -1,174 +1,198 @@
-# Flask Backend with Machine Learning (Joblib) + React Frontend
+# GlowGuide AI – Skincare Recommendation Web Application
 
-Ce projet utilise **Flask** comme backend API, un **modèle de machine learning sauvegardé avec joblib**, et un **frontend React + Vite** dans le même dossier.
+## 🌟 Description générale
 
----
+**GlowGuide AI** est une application web intelligente de recommandation de soins de la peau. Elle combine :
 
-## 📁 Structure du projet
+* 🧠 **Machine Learning (Python / Flask)**
+* ⚛️ **Frontend interactif (React + Vite)**
 
-```
-derma_ai/
-├── backend/
-│   ├── app.py
-│   ├── train_model.py
-│   ├── requirements.txt
-│   ├── utils/
-│   │   └── recommender.py
-│   └── model/
-│       └── final_model.joblib
-│
-├── frontend/   # React + Vite
-│   ├── src/
-│   ├── package.json
-│   └── vite.config.js
-│
-└── README.md
-```
+L’objectif de l’application est d’aider un utilisateur à **choisir les ingrédients et produits cosmétiques les plus adaptés** à ses besoins, en fonction :
+
+* de la zone du visage ou du corps
+* du type de produit souhaité
+* de ses préoccupations cutanées
+
+Toutes les recommandations sont générées automatiquement par un **modèle de machine learning entraîné à partir d’un fichier CSV**.
 
 ---
 
-## 🧠 Modèle de Machine Learning
+## 🧭 Fonctionnement global de l’application
 
-Le modèle est entraîné à partir d’un **fichier CSV** et sauvegardé sous forme de fichier **`.joblib`**.
+L’application fonctionne en **4 étapes principales** :
 
-### ➤ Contenu du fichier `final_model.joblib`
+### 1️⃣ Sélection de la zone et du type de produit
 
-Selon ton choix, il peut contenir :
+L’utilisateur commence par choisir :
 
-### Option 1️⃣ : uniquement le modèle
+* une **zone** (Face, Eyes, Lips, Hair, Body, etc.)
+* un **type de produit** (Serum, Cleanser, Sunscreen, Shampoo, etc.)
 
-```python
-final_model.joblib = sklearn_model
-```
-
-Dans ce cas, la liste des features (skin concerns) est définie manuellement dans le code.
-
-### Option 2️⃣ (recommandée) : modèle + métadonnées
-
-```python
-{
-  "features": ["Acne", "Hydrating", "Anti-Aging", ...],
-  "classifier": trained_model,
-  "label_binarizer": mlb  # si multi-label
-}
-```
+👉 Ces choix permettent de contextualiser les recommandations.
 
 ---
 
-## 🏋️ Entraînement du modèle (`train_model.py`)
+### 2️⃣ Sélection des préoccupations cutanées
+
+L’utilisateur sélectionne ensuite une ou plusieurs **skin concerns** parmi une liste prédéfinie, par exemple :
+
+* Acne Fighting
+* Anti-Aging
+* Hydrating
+* Redness Reducing
+* Rosacea
+* Dark Spots
+
+Chaque préoccupation est convertie en **feature binaire (0 / 1)** pour le modèle de machine learning.
+
+---
+
+### 3️⃣ Recommandation d’ingrédients (Machine Learning)
+
+Lorsque l’utilisateur valide ses choix :
+
+* Le frontend React envoie une requête `POST` au backend Flask
+* Le backend charge un **modèle ML sauvegardé avec `joblib`**
+* Le modèle prédit :
+
+  * ✅ les ingrédients **recommandés**
+  * ❌ les ingrédients **à éviter**
+
+Les résultats sont affichés sous forme claire et pédagogique.
+
+---
+
+### 4️⃣ Recommandation de produits finis
+
+À partir :
+
+* des ingrédients recommandés
+* du type de produit choisi
+
+Le backend filtre une base de données de produits cosmétiques et renvoie une liste de **produits compatibles** (nom, marque, type, ingrédients clés).
+
+---
+
+## 🧠 Machine Learning
+
+### 📄 Données d’entraînement
+
+Le modèle est entraîné à partir d’un **fichier CSV** contenant :
+
+* des colonnes de préoccupations cutanées (features)
+* une colonne cible indiquant les ingrédients recommandés
+
+Exemple simplifié :
+
+| Acne Fighting | Hydrating | Anti-Aging | Recommended Ingredients |
+| ------------- | --------- | ---------- | ----------------------- |
+| 1             | 0         | 1          | Niacinamide;Retinol     |
+
+---
+
+### 🏋️ Entraînement du modèle
+
+Le script `train_model.py` :
+
+* charge le CSV
+* entraîne un modèle (ex: RandomForest)
+* sauvegarde le modèle avec `joblib`
 
 ```python
-import pandas as pd
-import joblib
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import MultiLabelBinarizer
-
-# Charger le CSV
-df = pd.read_csv("model/data.csv")
-
-X = df.drop(columns=["Recommended Ingredients"])
-y_raw = df["Recommended Ingredients"].apply(lambda x: x.split(";"))
-
-mlb = MultiLabelBinarizer()
-y = mlb.fit_transform(y_raw)
-
-model = RandomForestClassifier()
-model.fit(X, y)
-
-model_data = {
-    "features": list(X.columns),
-    "classifier": model,
-    "label_binarizer": mlb
-}
-
 joblib.dump(model_data, "model/final_model.joblib")
 ```
 
-Lancer l'entraînement :
-
-```bash
-python train_model.py
-```
-
 ---
 
-## 🚀 Backend Flask (`app.py`)
+### 📦 Contenu du fichier `final_model.joblib`
 
 ```python
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import joblib
-from utils.recommender import get_recommendations
-
-app = Flask(__name__)
-CORS(app)
-
-model_data = joblib.load("model/final_model.joblib")
-
-@app.route("/api/recommend", methods=["POST"])
-def recommend():
-    data = request.get_json()
-    concerns = data.get("concerns", [])
-    recommendations = get_recommendations(concerns, model_data)
-    return jsonify({"recommendations": recommendations})
-
-if __name__ == "__main__":
-    app.run(debug=True)
+{
+  "features": ["Acne Fighting", "Hydrating", "Anti-Aging", ...],
+  "classifier": trained_model,
+  "label_binarizer": mlb
+}
 ```
 
-Démarrer le backend :
+Ce fichier est chargé **au démarrage du backend Flask**.
 
-```bash
-cd backend
-pip install -r requirements.txt
-python app.py
+---
+
+## 🚀 Backend Flask (API)
+
+Le backend expose deux endpoints principaux :
+
+### 🔹 POST `/predict`
+
+Utilisé pour recommander les ingrédients.
+
+**Entrée :**
+
+```json
+{
+  "features": [1, 0, 1, 0, ...],
+  "product_type": "Serum"
+}
+```
+
+**Sortie :**
+
+```json
+{
+  "ingredients": {
+    "niacinamide": "Yes",
+    "alcohol": "No"
+  }
+}
 ```
 
 ---
 
-## 🔁 Logique de recommandation (`utils/recommender.py`)
+### 🔹 POST `/filter-products`
 
-```python
-def get_recommendations(selected_concerns, model_data):
-    features = model_data["features"]
-    model = model_data["classifier"]
-    mlb = model_data.get("label_binarizer")
+Utilisé pour recommander des produits finis.
 
-    input_vector = [1 if f in selected_concerns else 0 for f in features]
-    prediction = model.predict([input_vector])
+**Entrée :**
 
-    if mlb:
-        return list(mlb.inverse_transform(prediction)[0])
-    return prediction.tolist()
+```json
+{
+  "ingredients": {...},
+  "product_type": "Serum"
+}
+```
+
+**Sortie :**
+
+```json
+{
+  "products": [
+    {"name": "Product A", "brand": "Brand X"}
+  ]
+}
 ```
 
 ---
 
-## 🌐 Connexion avec React
+## ⚛️ Frontend React + Vite
 
-### Exemple d’appel API côté React :
+Le frontend :
 
-```js
-fetch("/api/recommend", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    concerns: ["Acne", "Hydrating"]
-  })
-})
-.then(res => res.json())
-.then(data => console.log(data.recommendations));
-```
+* gère l’interface utilisateur
+* guide l’utilisateur étape par étape
+* communique avec Flask via `fetch`
+* affiche les résultats de manière visuelle et intuitive
+
+Le fichier `App.jsx` contient toute la logique de navigation, de sélection et d’affichage.
 
 ---
 
 ## ✅ Résumé
 
-* Le **CSV** sert à entraîner le modèle
-* Le modèle est sauvegardé avec **joblib**
-* Flask charge le modèle et expose une API REST
-* React consomme l’API via `/api/recommend`
+* GlowGuide AI est une **application intelligente de recommandation cosmétique**
+* Elle combine **React**, **Flask** et **Machine Learning**
+* Les recommandations sont **personnalisées**, basées sur les choix de l’utilisateur
+* Le modèle est entraîné à partir de données réelles (CSV)
 
 ---
 
-📌 Tu peux maintenant déployer ou améliorer ton modèle facilement.
+📌 Cette application peut être utilisée comme projet académique, démonstration IA ou base pour une application réelle.
