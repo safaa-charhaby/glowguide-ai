@@ -133,6 +133,8 @@ Les colonnes *Ingredients* et *AfterUse* sont multi-label. Elles ont été trans
 
 3️⃣ **Catégories fonctionnelles (final)** : prédiction de catégories d’ingrédients
 → Réduction du nombre de classes (~25), meilleure stabilité et interprétabilité.
+<img width="608" height="682" alt="image" src="https://github.com/user-attachments/assets/43790f19-8fdd-48be-a0d1-9333d2dca4b1" />
+ Tableau 1 – Performances comparées des approches. Les valeurs sont indicatives (moyennes globaux) : on note la supériorité du SVM sur le RF et l’amélioration progressive des métriques en allant vers les approches “F1>60 %” et “Catégories”.
 
 ---
 
