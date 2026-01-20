@@ -75,6 +75,154 @@ Le backend filtre une base de données de produits cosmétiques et renvoie une l
 
 ## 🧠 Machine Learning
 
+## 📊 Description détaillée du dataset
+
+Le jeu de données **SkinSort** contient des informations sur des produits de soin de la peau provenant de plusieurs marques internationales. Chaque ligne correspond à un **produit unique**.
+
+### Colonnes principales
+
+* **Brand** : marque du produit
+* **Name** : nom du produit
+* **Type** : catégorie du produit (Toner, Sérum, Nettoyant, Crème hydratante, etc.)
+* **Country** : pays d’origine de la marque
+* **Ingredients** : liste des ingrédients de la formule
+* **AfterUse** : bénéfices attendus après utilisation (hydratation, anti-acné, anti-ride, etc.)
+
+Le dataset combine ainsi des **variables textuelles**, **catégorielles** et **multi-label**. Les données brutes ont été nettoyées (minuscules, suppression de ponctuation, normalisation des noms d’ingrédients).
+
+---
+
+## 🧪 Protocole expérimental
+
+### 🔍 Analyse Exploratoire des Données (EDA)
+
+**Exploration générale**
+Le dataset a été analysé afin de comprendre sa structure et la qualité des données. Les colonnes critiques (Brand, Ingredients, AfterUse) sont bien renseignées dans la majorité des cas, ce qui a permis de conserver l’essentiel des enregistrements sans perte significative.
+
+**Traitement des variables catégorielles et textuelles**
+Les colonnes *Ingredients* et *AfterUse* sont multi-label. Elles ont été transformées en représentations binaires via **One-Hot Encoding**. Chaque ingrédient ou effet est représenté par une colonne indiquant sa présence (1) ou son absence (0).
+
+**Visualisations et statistiques descriptives**
+
+* Répartition par type de produit : dominance des sérums et hydratants
+* Distribution du nombre d’ingrédients : majorité entre 20 et 25 ingrédients
+* Distribution du nombre d’effets : principalement entre 1 et 5 effets
+* Top ingrédients fréquents : glycérine, acide hyaluronique, etc.
+* Top effets fréquents : hydratation, anti-âge, anti-acné
+* Matrice de co-occurrence des effets mettant en évidence des associations fréquentes (ex. hydratant + éclat)
+
+---
+
+### ⚙️ Prétraitement des données
+
+* Extraction et normalisation des ingrédients
+* Regroupement des ingrédients en **catégories fonctionnelles** (hydratant, antioxydant, rétinol, peptides, etc.)
+* Encodage one-hot des variables Brand, Type et Country
+* Sélection de labels pour certaines approches (F1 > 60 %)
+* Séparation train/test via **stratification multi-label itérative (Sechidis)** avec 33 % de données en test
+
+---
+
+### 🧠 Approches testées
+
+1️⃣ **Tous ingrédients** : prédiction de tous les ingrédients individuels
+→ Haute dimension, forte imbalance, performances faibles sur ingrédients rares.
+
+2️⃣ **Ingrédients (F1 > 60 %)** : prédiction uniquement des ingrédients bien appris
+→ Bonnes performances mais comportement instable en conditions réelles.
+
+3️⃣ **Catégories fonctionnelles (final)** : prédiction de catégories d’ingrédients
+→ Réduction du nombre de classes (~25), meilleure stabilité et interprétabilité.
+
+---
+
+### 🤖 Modélisation et choix du modèle
+
+Plusieurs algorithmes ont été évalués : **KNN**, **Random Forest**, **SVM**.
+
+* **KNN** : écarté (coût élevé en haute dimension)
+* **Random Forest** : robuste mais plus lent et moins performant
+* **SVM RBF** : meilleures performances globales et inférence rapide
+
+Le modèle final est un **SVM à noyau RBF encapsulé dans un MultiOutputClassifier**, permettant la prédiction multi-label.
+
+---
+
+### 📈 Optimisation et évaluation
+
+* Recherche d’hyperparamètres via **Random Search** puis **Grid Search**
+* Métriques utilisées : F1-score (micro/macro), précision, rappel, Hamming Loss
+
+Résultat final :
+
+* **F1-score global ≈ 0.70**
+* **Hamming Loss ≈ 0.16** (84 % des étiquettes bien prédites)
+* Temps de prédiction rapide, adapté à une application interactive
+
+👉 Le **SVM RBF + catégories fonctionnelles** a été retenu comme meilleur compromis entre performance, robustesse et interprétabilité.
+
+---
+
+## 📊 Visualisations et courbes d’évaluation
+
+Afin de mieux comprendre les données et d’évaluer les performances du modèle, plusieurs **graphes et visualisations** ont été générés durant l’analyse et l’entraînement.
+
+### 📈 1. Répartition des types de produits
+
+**Objectif :** comprendre la distribution des catégories de produits dans le dataset.
+
+* Type de graphe : diagramme en barres
+* Interprétation : permet d’identifier les classes dominantes (ex. Sérum, Crème hydratante)
+
+
+
+---
+
+### 🧪 2. Distribution du nombre d’ingrédients par produit
+
+**Objectif :** analyser la complexité des formulations cosmétiques.
+
+* Type de graphe : histogramme
+* Observation : la majorité des produits contiennent entre 20 et 25 ingrédients
+<img width="610" height="353" alt="image" src="https://github.com/user-attachments/assets/5ca49d53-0e64-45b7-92a3-59e5b10554b3" />
+
+
+---
+
+### 🔗 3. Matrice de co-occurrence des effets (AfterUse)
+
+**Objectif :** identifier les associations fréquentes entre effets cosmétiques.
+
+* Type de graphe : heatmap
+* Exemple : Hydratant + Éclat apparaissent souvent ensemble
+<img width="606" height="357" alt="image" src="https://github.com/user-attachments/assets/0eccb1ce-8319-44f5-b16d-3e5ea0627d25" />
+
+
+---
+
+### 📉 4.  performance du modèle
+
+**Objectif :** évaluer quantitativement le modèle multi-label.
+
+#### a) F1-score par catégorie fonctionnelle
+
+* Permet d’identifier les classes bien ou mal apprises
+<img width="1138" height="509" alt="image" src="https://github.com/user-attachments/assets/e976019d-53a3-4ca3-beed-6a73e5f4d5b3" />
+
+
+#### b) metrics  globale
+
+<img width="1040" height="693" alt="image" src="https://github.com/user-attachments/assets/7955ec29-687c-49c8-9085-58812ebbb664" />
+
+#### c) La courbe ROC: 
+**Objectif :** évaluer la capacité d’un modèle à distinguer les classes, et plus la courbe s’approche du coin supérieur gauche, meilleure est la performance.
+<img width="454" height="349" alt="image" src="https://github.com/user-attachments/assets/55153a85-40d8-48db-82b9-a94f0b433ed0" />
+#### d)La courbe DET 
+**Objectif :** comparer plus finement les erreurs des systèmes de détection, surtout quand les erreurs sont rares.
+<img width="452" height="333" alt="image" src="https://github.com/user-attachments/assets/17866794-ebbe-45a3-afdf-117e9b068f6f" />
+
+---
+
 ### 📄 Données d’entraînement
 
 Le modèle est entraîné à partir d’un **fichier CSV** contenant :
@@ -87,6 +235,26 @@ Exemple simplifié :
 | Acne Fighting | Hydrating | Anti-Aging | Recommended Ingredients |
 | ------------- | --------- | ---------- | ----------------------- |
 | 1             | 0         | 1          | Niacinamide;Retinol     |
+
+---
+
+### 🤖 Modèle de Machine Learning utilisé et justification
+
+#### 🔍 Modèle choisi : **Random Forest Classifier**
+
+Dans ce projet, nous avons choisi d’utiliser un **Random Forest Classifier**, un algorithme d’apprentissage supervisé basé sur un ensemble d’arbres de décision.
+
+#### ✅ Pourquoi Random Forest ?
+
+Ce choix est motivé par plusieurs raisons :
+
+* **Adapté aux données tabulaires** : notre dataset CSV est composé de variables binaires (0/1), ce qui correspond parfaitement aux forces de Random Forest.
+* **Gestion du multi-label** : le modèle peut prédire plusieurs ingrédients en même temps lorsqu’il est combiné avec un `MultiLabelBinarizer`.
+* **Robuste au bruit** : grâce à l’agrégation de plusieurs arbres, le modèle réduit le risque de surapprentissage (overfitting).
+* **Interprétable** : il est possible d’analyser l’importance des features (skin concerns) dans la décision.
+* **Rapide à entraîner** : idéal pour un projet académique ou prototype.
+
+> 💡 D’autres modèles (Logistic Regression, SVM, Neural Networks) ont été envisagés, mais Random Forest offre le meilleur compromis entre performance, simplicité et explicabilité.
 
 ---
 
